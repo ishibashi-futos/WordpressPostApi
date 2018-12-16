@@ -95,12 +95,12 @@ namespace WordpressPostApi
                     var res = req.Get(string.Format(categoryUrl, slug));
                     var serializer = new JavaScriptSerializer();
                     // jsonの文字列をCategoriesの配列にキャスト
-                    List<Categories> response = (List<Categories>)serializer.Deserialize(res, typeof(List<Categories>));
+                    List<Category> response = (List<Category>)serializer.Deserialize(res, typeof(List<Category>));
                     if (response.Count == 0)
                     {
                         throw new Exception(string.Format("カテゴリが存在しません:{0}", slug));
                     }
-                    foreach (Categories t in response)
+                    foreach (Category t in response)
                     {
                         result.Add(t.id);
                     }
@@ -146,7 +146,7 @@ namespace WordpressPostApi
         /// <summary>
         /// Categoriesをjsonにパースするために作ったデータクラス
         /// </summary>
-        class Categories
+        class Category
         {
             public int id;
             public string description;
@@ -180,7 +180,7 @@ namespace WordpressPostApi
             }
 
             /// <summary>
-            /// Getリクエストを実行するクラス。
+            /// Getリクエストを実行するメソッド。
             /// </summary>
             public string Get(string url)
             {
@@ -199,12 +199,13 @@ namespace WordpressPostApi
             }
 
             /// <summary>
-            /// Postリクエストを実行するクラス。
+            /// Postリクエストを実行するメソッド。
             /// </summary>
             public string Post(string url, PostContent data)
             {
                 var serializer = new JavaScriptSerializer();
                 var json = serializer.Serialize(data);
+                // Content-Type: application/jsonとしてセット
                 var content = new StringContent(json, new UTF8Encoding(), "application/json");
                 HttpResponseMessage res = client.PostAsync(Uri.EscapeUriString(baseUrl + url), content).Result;
                 // レスポンスステータスが正常の場合
