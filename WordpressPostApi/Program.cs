@@ -63,7 +63,7 @@ namespace WordpressPostApi
                 post.SetTags(tags, req);
 
                 // エラーが無ければPost投稿を行う
-                var postResult = Regex.Unescape(req.Post("/wp-json/wp/v2/posts", post));
+                var postResult = Regex.Unescape(req.Post("/wp-json/wp/v2/posts", post.ToJson()));
                 Console.WriteLine(string.Format("投稿に成功しました:{0}", postResult));
             }
             catch (Exception e)
@@ -129,6 +129,15 @@ namespace WordpressPostApi
                 tags = result;
             }
             public string status;
+            /// <summary>
+            /// 自分自身をJSONに変換するメソッド
+            /// </summary>
+            /// <returns>string</returns>
+            public string ToJson()
+            {
+                var serializer = new JavaScriptSerializer();
+                return serializer.Serialize(this);
+            }
         }
 
         /// <summary>
@@ -201,10 +210,12 @@ namespace WordpressPostApi
             /// <summary>
             /// Postリクエストを実行するメソッド。
             /// </summary>
-            public string Post(string url, PostContent data)
+            /// <param name="url">requestUrl</param>
+            /// <param name="json">PostData(json)</param>
+            /// <returns>string</returns>
+            public string Post(string url, string json)
             {
                 var serializer = new JavaScriptSerializer();
-                var json = serializer.Serialize(data);
                 // Content-Type: application/jsonとしてセット
                 var content = new StringContent(json, new UTF8Encoding(), "application/json");
                 HttpResponseMessage res = client.PostAsync(Uri.EscapeUriString(baseUrl + url), content).Result;
