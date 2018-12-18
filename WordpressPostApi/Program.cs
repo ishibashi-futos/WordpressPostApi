@@ -93,16 +93,24 @@ namespace WordpressPostApi
                 foreach (string slug in slugs)
                 {
                     var res = req.Get(string.Format(categoryUrl, slug));
-                    var serializer = new JavaScriptSerializer();
-                    // jsonの文字列をCategoriesの配列にキャスト
-                    List<Category> response = (List<Category>)serializer.Deserialize(res, typeof(List<Category>));
-                    if (response.Count == 0)
+                    try
                     {
-                        throw new Exception(string.Format("カテゴリが存在しません:{0}", slug));
+                        var serializer = new JavaScriptSerializer();
+                        // jsonの文字列をCategoriesの配列にキャスト
+                        List<Category> response = (List<Category>)serializer.Deserialize(res, typeof(List<Category>));
+                        if (response.Count == 0)
+                        {
+                            throw new Exception(string.Format("カテゴリが存在しません:{0}", slug));
+                        }
+                        foreach (Category t in response)
+                        {
+                            result.Add(t.id);
+                        }
                     }
-                    foreach (Category t in response)
+                    catch (InvalidOperationException e)
                     {
-                        result.Add(t.id);
+                        // JSONをDeserializeした際に発生する例外
+                        throw new Exception(string.Format("JSONの型に誤りがあります。APIの仕様が変更されていないか確認してください: {0}", res), e);
                     }
                 }
                 categories = result;
@@ -115,15 +123,23 @@ namespace WordpressPostApi
                 foreach (string slug in slugs)
                 {
                     var res = req.Get(string.Format(tagsUrl, slug));
-                    var serializer = new JavaScriptSerializer();
-                    List<Tag> response = (List<Tag>)serializer.Deserialize(res, typeof(List<Tag>));
-                    if (response.Count == 0)
+                    try
                     {
-                        throw new Exception(string.Format("tagが存在しません:{0}", slug));
+                        var serializer = new JavaScriptSerializer();
+                        List<Tag> response = (List<Tag>)serializer.Deserialize(res, typeof(List<Tag>));
+                        if (response.Count == 0)
+                        {
+                            throw new Exception(string.Format("tagが存在しません:{0}", slug));
+                        }
+                        foreach (Tag t in response)
+                        {
+                            result.Add(t.id);
+                        }
                     }
-                    foreach (Tag t in response)
+                    catch (InvalidOperationException e)
                     {
-                        result.Add(t.id);
+                        // JSONをDeserializeした際に発生する例外
+                        throw new Exception(string.Format("JSONの型に誤りがあります。APIの仕様が変更されていないか確認してください: {0}", res), e);
                     }
                 }
                 tags = result;
